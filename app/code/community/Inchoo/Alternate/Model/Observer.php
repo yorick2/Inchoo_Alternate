@@ -1,29 +1,49 @@
 <?php
-
 class Inchoo_Alternate_Model_Observer
 {
-
     public function alternateLinks()
     {
         $headBlock = Mage::app()->getLayout()->getBlock('head');
 
         $stores = Mage::app()->getStores();
-        $product = Mage::registry('current_product');
-        $category = Mage::registry('current_category');
+        $prod = Mage::registry('current_product');
+        $categ = Mage::registry('current_category');
 
-        if ($headBlock) {
-            foreach ($stores as $store) {
-                if ($product) {
-                    $category ? $categoryId = $category->getId() : $categoryId = null;
-                    $url = $store->getBaseUrl() . Mage::helper('inchoo_alternate')->rewrittenProductUrl($product->getId(), $categoryId, $store->getId());
-                } else {
-                    $store->getCurrentUrl();
+        $languageRefs = [
+            'au' => "en-AU",
+            'ca_en' => "en-CA",
+            'ca_fr' => "fr-CA",
+            'dk' => "da",
+            'default' => "en-GB",
+            'no' => "no" ,
+            'se' => "sv" ,
+            'us' => "en-US" ,
+            'fi' => "fi" ,
+            'fr' => "fr" ,
+            'de' => "de",
+            'it' => "it",
+            'nl' => "nl"
+        ];
+        $currentStoreCode = Mage::app()->getStore()->getCode();
+
+        if($headBlock){
+            foreach ($stores as $store){
+                $storeCode = $store->getCode();
+                if( $currentStoreCode !== $storeCode) {
+                    if ($prod) {
+                        $categ ? $categId = $categ->getId() : $categId = null;
+                        $url = $store->getBaseUrl() . Mage::helper('inchoo_alternate')
+                                ->rewrittenProductUrl($prod->getId(), $categId, $store->getId())
+                        ;
+                    } else {
+                        $url = $store->getCurrentUrl();
+                    }
+                    $urlPart = explode('?', $url, 2)[0];
+                    //$storeCode = substr(Mage::getStoreConfig('general/locale/code', $store->getId()),0,2);
+                    $headBlock->addLinkRel('alternate"' . ' hreflang="' . $languageRefs[$storeCode], $urlPart);
                 }
-                $storeCode = substr(Mage::getStoreConfig('general/locale/code', $store->getId()), 0, 2);
-                $headBlock->addLinkRel('alternate"' . ' hreflang="' . $storeCode, $url);
             }
         }
         return $this;
     }
-
 }
