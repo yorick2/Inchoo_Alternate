@@ -8,6 +8,7 @@ class Inchoo_Alternate_Model_Observer
         $stores = Mage::app()->getStores();
         $prod = Mage::registry('current_product');
         $categ = Mage::registry('current_category');
+        $cms = Mage::getSingleton('cms/page')->getIdentifier();
 
         $languageRefs = [
             'au' => "en-AU",
@@ -15,6 +16,8 @@ class Inchoo_Alternate_Model_Observer
             'ca_fr' => "fr-CA",
             'dk' => "da",
             'default' => "en-GB",
+            'en' => "en",
+            'ro' => "ro",
             'no' => "no" ,
             'se' => "sv" ,
             'us' => "en-US" ,
@@ -35,6 +38,12 @@ class Inchoo_Alternate_Model_Observer
                         $url = $store->getBaseUrl() . Mage::helper('inchoo_alternate')
                                 ->rewrittenProductUrl($prod->getId(), $categId, $store->getId())
                         ;
+                    } elseif ($categ) {
+                        $url = $store->getBaseUrl() . Mage::helper('inchoo_alternate')
+                                ->rewrittenCategoryUrl($categ->getId(), $store->getId());
+                    } elseif ($cms) {
+                        $url = $store->getBaseUrl() . Mage::helper('inchoo_alternate')
+                                ->rewrittenCmsUrl($cms, $store->getId());
                     } else {
                         $url = $store->getCurrentUrl();
                     }
